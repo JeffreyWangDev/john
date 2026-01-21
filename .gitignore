@@ -2,3 +2,4 @@
 *.db
 *.pyc
 .venv
+__pycache__/
