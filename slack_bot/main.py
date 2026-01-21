@@ -10,9 +10,25 @@ from db import (
     save_thread_messages_as_events,
     add_participant,
     get_issue_by_thread_id,
-    update_issue_from_ai
+    update_issue_from_ai,
+    create_program as db_create_program,
+    get_program,
+    get_program_by_channel,
+    add_channel_to_program,
+    add_program_owner,
+    remove_program_owner,
+    get_all_programs,
+    link_issue_to_program,
+    set_issue_owner,
+    set_channel_owner,
+    remove_channel_owner,
+    remove_issue_owner,
+    is_issue_owner,
+    is_channel_owner,
+    get_issue_with_program
 )
 from slack_bolt.request import BoltRequest
+from permissions import Permission, has_permission, get_user_permission, require_permission
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from ai_handler import create_ai_job, process_ai_job, summarize_thread
@@ -81,7 +97,19 @@ def handle_app_mention(event, say, logger):
     
     if thread_ts:
         try:
-            existing_issue = get_issue_by_thread_id(thread_ts)
+            program = get_program_by_channel(event["channel"])
+            if not program:
+                app.client.chat_postMessage(
+                    channel=event["channel"],
+                    text=(
+                        "❌ This channel is not managed by a program yet.\n\n"
+                        "Ask the HQ staff to request this be added to john!"
+                    ),
+                    thread_ts=thread_ts
+                )
+                return
+            
+            existing_issue = get_issue_by_thread_id(thread_ts, event["channel"])
             if existing_issue:
                 app.client.chat_postMessage(
                     channel=event["channel"],
@@ -101,6 +129,11 @@ def handle_app_mention(event, say, logger):
                 title=title or "Untitled Issue",
                 description=f"Issue created from Slack thread in channel {event['channel']}"
             )
+            
+            set_issue_owner(str(issue.id), user)
+            
+            if program:
+                link_issue_to_program(str(issue.id), program.program_id)
             
             events = save_thread_messages_as_events(
                 issue_id=str(issue.id),
@@ -146,14 +179,23 @@ def handle_app_mention(event, say, logger):
                 except Exception as ai_error:
                     logger.exception(f"Error processing AI job: {ai_error}")
             
+            user_perm = get_user_permission(user, channel_id=event["channel"], issue_id=str(issue.id))
+            
+            issue_data = get_issue_with_program(str(issue.id))
+            program_info = ""
+            if issue_data and issue_data.get("program"):
+                program_info = f"*Program:* {issue_data['program']['name']}\n"
+            
             app.client.chat_postMessage(
                 channel=event["channel"],
                 text=(
                     f"✅ Issue created successfully!\n\n"
                     f"*Issue ID:* `{issue.id}`\n"
+                    f"{program_info}"
                     f"*Status:* {issue.status}\n"
                     f"*Messages saved:* {len(events)}\n"
-                    f"*Participants:* {len(unique_users)}"
+                    f"*Participants:* {len(unique_users)}\n"
+                    f"*Your role:* {user_perm.value}"
                 ),
                 thread_ts=thread_ts
             )
@@ -172,8 +214,6 @@ def handle_app_mention(event, say, logger):
             thread_ts=event.get("ts")
         )
         
-        
-            
 
 @app.event("message")
 def handle_message_events(event, logger):
@@ -188,7 +228,7 @@ def handle_message_events(event, logger):
         return
     
     try:
-        existing_issue = get_issue_by_thread_id(thread_ts)
+        existing_issue = get_issue_by_thread_id(thread_ts, event.get("channel"))
         if not existing_issue:
             return
         
@@ -229,9 +269,9 @@ if __name__ == "__main__":
     
     if socket_token:
         handler = SocketModeHandler(app, socket_token)
-        print("⚡️ Slack bot is running in Socket Mode!")
+        print("Slack bot is running in Socket Mode!")
         handler.start()
     else:
         port = int(os.environ.get("PORT", 3000))
-        print(f"⚡️ Slack bot is running on port {port}!")
+        print(f"Slack bot is running on port {port}!")
         app.start(port=port)

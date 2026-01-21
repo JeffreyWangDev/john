@@ -38,6 +38,7 @@ class Issue(Base):
     __tablename__ = "issues"
 
     id = Column(UUID(), primary_key=True, default=uuid.uuid4)
+    program_id = Column(UUID(), ForeignKey("programs.id", ondelete="SET NULL"), nullable=True)
     title = Column(Text)
     description = Column(Text)
     status = Column(String(20), default="unverified")
@@ -52,6 +53,7 @@ class Issue(Base):
     issue_tags = relationship("IssueTag", back_populates="issue", cascade="all, delete-orphan")
     status_changes = relationship("IssueStatusChange", back_populates="issue", cascade="all, delete-orphan")
     outbound_webhooks = relationship("OutboundWebhook", back_populates="issue", cascade="all, delete-orphan")
+    program = relationship("Program", back_populates="issues")
 
 
 class Event(Base):
@@ -141,6 +143,22 @@ class OutboundWebhook(Base):
     issue = relationship("Issue", back_populates="outbound_webhooks")
 
 
+class Program(Base):
+    __tablename__ = "programs"
+
+    id = Column(UUID(), primary_key=True, default=uuid.uuid4)
+    program_id = Column(String(255), unique=True, nullable=False)
+    name = Column(Text, nullable=False)
+    description = Column(Text, nullable=True)
+    owners = Column(JSON, default=[])  # List of owner user_ids
+    channels = Column(JSON, default=[])  # List of associated channel_ids
+    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
+    updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now())
+    deleted_at = Column(TIMESTAMP(timezone=True), nullable=True)
+
+    issues = relationship("Issue", back_populates="program")
+
+
 class AIJob(Base):
     __tablename__ = "ai_jobs"
 
@@ -154,3 +172,15 @@ class AIJob(Base):
     deleted_at = Column(TIMESTAMP(timezone=True), nullable=True)
 
     event = relationship("Event", back_populates="ai_jobs")
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(UUID(), primary_key=True, default=uuid.uuid4)
+    user_id = Column(String(255), unique=True, nullable=False)  # External user ID (e.g., Slack user ID)
+    display_name = Column(Text, nullable=False)
+    profile_picture_url = Column(Text)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
+    updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now())
+    deleted_at = Column(TIMESTAMP(timezone=True), nullable=True)

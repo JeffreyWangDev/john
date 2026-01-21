@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Programs - Issue Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f5f5f5;
+        }
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar h1 {
+            color: #333;
+            font-size: 1.5rem;
+        }
+        .navbar-right {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        .nav-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .nav-link:hover {
+            text-decoration: underline;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .header h2 {
+            color: #333;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.3s;
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        .programs-grid {
+            display: grid;
+            gap: 1rem;
+        }
+        .program-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .program-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+        .program-title {
+            font-size: 1.2rem;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        .program-id {
+            color: #667eea;
+            font-size: 0.875rem;
+            font-family: monospace;
+            margin-bottom: 0.5rem;
+        }
+        .program-description {
+            color: #666;
+            margin-bottom: 1rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .program-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            font-size: 0.875rem;
+            color: #666;
+        }
+        .program-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #999;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 100%;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+        }
+        .close-btn:hover {
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 600;
+        }
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+        .error-message {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>Issue Management</h1>
+        <div class="navbar-right">
+            <a href="/issues" class="nav-link">Issues</a>
+            <a href="/programs" class="nav-link">Programs</a>
+            <div class="user-info">
+                {% if user.image %}
+                <img src="{{ user.image }}" alt="{{ user.name }}" class="user-avatar">
+                {% endif %}
+                <span>{{ user.name }}</span>
+            </div>
+            <a href="/logout" class="nav-link">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h2>Programs</h2>
+            <button class="btn btn-primary" onclick="openCreateModal()">Create New Program</button>
+        </div>
+
+        <div class="programs-grid" id="programsGrid">
+            {% if programs %}
+                {% for program in programs %}
+                <div class="program-card">
+                    <div class="program-header">
+                        <div>
+                            <h3 class="program-title">{{ program.name }}</h3>
+                            <div class="program-id">{{ program.program_id }}</div>
+                            <p class="program-description">{{ program.description or 'No description' }}</p>
+                        </div>
+                        <div class="program-actions">
+                            <button class="btn btn-danger btn-small" onclick="deleteProgram('{{ program.id }}', '{{ program.name }}')">Delete</button>
+                        </div>
+                    </div>
+                    <div class="program-meta">
+                        <span>👥 {{ program.owners|length }} owner(s)</span>
+                        <span>📢 {{ program.channels|length }} channel(s)</span>
+                        <span>📅 Created: {{ program.created_at.strftime('%Y-%m-%d') if program.created_at else '' }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <h3>No programs found</h3>
+                    <p>Programs will appear here when they are created</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Create Program Modal -->
+    <div class="modal" id="createModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Program</h2>
+                <button class="close-btn" onclick="closeCreateModal()">&times;</button>
+            </div>
+            <form id="createForm" onsubmit="createProgram(event)">
+                <div class="form-group">
+                    <label for="programId">Program ID *</label>
+                    <input type="text" id="programId" required placeholder="e.g., PROG-001">
+                    <div class="error-message" id="programIdError"></div>
+                </div>
+                <div class="form-group">
+                    <label for="name">Name *</label>
+                    <input type="text" id="name" required placeholder="e.g., Customer Support Program">
+                </div>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" placeholder="Program description..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="owners">Owners (comma-separated Slack user IDs)</label>
+                    <input type="text" id="owners" placeholder="e.g., U123456,U789012">
+                </div>
+                <div class="form-group">
+                    <label for="channels">Channels (comma-separated channel IDs)</label>
+                    <input type="text" id="channels" placeholder="e.g., C123456,C789012">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn" onclick="closeCreateModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Program</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openCreateModal() {
+            document.getElementById('createModal').classList.add('active');
+        }
+        
+        function closeCreateModal() {
+            document.getElementById('createModal').classList.remove('active');
+            document.getElementById('createForm').reset();
+            document.getElementById('programIdError').textContent = '';
+        }
+        
+        async function createProgram(event) {
+            event.preventDefault();
+            
+            const programId = document.getElementById('programId').value;
+            const name = document.getElementById('name').value;
+            const description = document.getElementById('description').value;
+            const ownersInput = document.getElementById('owners').value;
+            const channelsInput = document.getElementById('channels').value;
+            
+            const owners = ownersInput ? ownersInput.split(',').map(s => s.trim()).filter(s => s) : [];
+            const channels = channelsInput ? channelsInput.split(',').map(s => s.trim()).filter(s => s) : [];
+            
+            try {
+                const response = await fetch('/api/programs', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        program_id: programId,
+                        name: name,
+                        description: description,
+                        owners: owners,
+                        channels: channels
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    document.getElementById('programIdError').textContent = error.detail || 'Failed to create program';
+                    return;
+                }
+                
+                // Reload the page to show the new program
+                window.location.reload();
+            } catch (error) {
+                console.error('Error creating program:', error);
+                document.getElementById('programIdError').textContent = 'An error occurred. Please try again.';
+            }
+        }
+        
+        async function deleteProgram(programId, programName) {
+            if (!confirm(`Are you sure you want to delete "${programName}"?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/programs/${programId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    alert(error.detail || 'Failed to delete program');
+                    return;
+                }
+                
+                // Reload the page
+                window.location.reload();
+            } catch (error) {
+                console.error('Error deleting program:', error);
+                alert('An error occurred. Please try again.');
+            }
+        }
+        
+        // Close modal on background click
+        document.getElementById('createModal').addEventListener('click', (e) => {
+            if (e.target.id === 'createModal') {
+                closeCreateModal();
+            }
+        });
+    </script>
+</body>
+</html>

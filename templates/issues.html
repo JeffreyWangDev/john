@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issues - Issue Management</title>
+    <link rel="stylesheet" href="/static/css/issues.css">
+</head>
+<body>
+    <nav class="navbar">
+        <h1>Issue Management</h1>
+        <div class="navbar-right">
+            <a href="/issues" class="nav-link">Issues</a>
+            <a href="/programs" class="nav-link">Programs</a>
+            <div class="user-info">
+                {% if user.image %}
+                <img src="{{ user.image }}" alt="{{ user.name }}" class="user-avatar">
+                {% endif %}
+                <span>{{ user.name }}</span>
+            </div>
+            <a href="/logout" class="nav-link">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h2>Issues</h2>
+        </div>
+        
+        <div class="filters">
+            <select class="filter-select" id="statusFilter">
+                <option value="">All Statuses</option>
+                <option value="unverified">Unverified</option>
+                <option value="open">Open</option>
+                <option value="in_progress">In Progress</option>
+                <option value="resolved">Resolved</option>
+                <option value="closed">Closed</option>
+            </select>
+            <select class="filter-select" id="priorityFilter">
+                <option value="">All Priorities</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+                <option value="critical">Critical</option>
+            </select>
+        </div>
+
+        <div class="issues-grid" id="issuesGrid">
+            {% if issues %}
+                {% for issue in issues %}
+                <div class="issue-card" onclick="showIssueDetail('{{ issue.id }}')">
+                    <div class="issue-header">
+                        <div>
+                            <h3 class="issue-title">{{ issue.title }}</h3>
+                            <div class="issue-description">{{ issue.description or 'No description' }}</div>
+                        </div>
+                    </div>
+                    <div class="issue-meta">
+                        <span class="badge status-{{ issue.status }}">{{ issue.status }}</span>
+                        <span class="badge priority-{{ issue.priority }}">{{ issue.priority }}</span>
+                        <span class="issue-date">{{ issue.created_at.strftime('%Y-%m-%d %H:%M') if issue.created_at else '' }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <h3>No issues found</h3>
+                    <p>Issues will appear here when they are created</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="modal" id="issueModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Loading...</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modalBody">Loading...</div>
+        </div>
+    </div>
+
+    <script src="/static/js/issues.js"></script>
+</body>
+</html>

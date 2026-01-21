@@ -1,0 +1,279 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    background: #f5f5f5;
+}
+.navbar {
+    background: white;
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.navbar h1 {
+    color: #333;
+    font-size: 1.5rem;
+}
+.navbar-right {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+.nav-link {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+}
+.nav-link:hover {
+    text-decoration: underline;
+}
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+}
+.container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+.header h2 {
+    color: #333;
+}
+.filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+.filter-select {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: white;
+}
+.issues-grid {
+    display: grid;
+    gap: 1rem;
+}
+.issue-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.issue-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.issue-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 0.5rem;
+}
+.issue-title {
+    font-size: 1.2rem;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+.issue-description {
+    color: #666;
+    margin-bottom: 1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    white-space: pre-wrap;
+}
+.issue-meta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    font-size: 0.875rem;
+}
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+.status-unverified { background: #fef3c7; color: #92400e; }
+.status-open { background: #dbeafe; color: #1e40af; }
+.status-in_progress { background: #e0e7ff; color: #4338ca; }
+.status-resolved { background: #d1fae5; color: #065f46; }
+.status-closed { background: #e5e7eb; color: #374151; }
+
+.priority-low { background: #f3f4f6; color: #6b7280; }
+.priority-medium { background: #fef3c7; color: #92400e; }
+.priority-high { background: #fee2e2; color: #991b1b; }
+.priority-critical { background: #fecaca; color: #7f1d1d; }
+
+.issue-date {
+    color: #999;
+    font-size: 0.875rem;
+}
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #999;
+}
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    padding: 2rem;
+    overflow-y: auto;
+}
+.modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    max-width: 800px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 1rem;
+}
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #999;
+}
+.close-btn:hover {
+    color: #333;
+}
+.event {
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+}
+.event-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+.event-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #e5e7eb;
+    flex-shrink: 0;
+}
+.event-author {
+    font-weight: 600;
+    color: #333;
+}
+.event-body {
+    color: #666;
+    margin-bottom: 0.5rem;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+.event-date {
+    color: #999;
+    font-size: 0.75rem;
+}
+.mention {
+    color: #667eea;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-block;
+    text-decoration: underline;
+    text-decoration-style: wavy;
+    text-decoration-color: rgba(102, 126, 234, 0.5);
+    transition: all 0.2s ease;
+    position: relative;
+}
+.mention:hover {
+    color: #5568d3;
+    text-decoration-color: #667eea;
+}
+.user-tooltip {
+    position: fixed;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    z-index: 10000;
+    min-width: 250px;
+    display: none;
+    white-space: normal;
+    max-width: 90vw;
+    max-height: 400px;
+    overflow: auto;
+}
+.user-tooltip.show {
+    display: block;
+}
+.tooltip-header {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+.tooltip-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+.tooltip-avatar img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+}
+.tooltip-info h4 {
+    margin: 0;
+    color: #333;
+    font-size: 0.95rem;
+}
+.tooltip-info p {
+    margin: 0.25rem 0 0;
+    color: #666;
+    font-size: 0.85rem;
+}
